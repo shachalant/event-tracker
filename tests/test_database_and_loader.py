@@ -22,7 +22,7 @@ def sample():
                     "venue": "Room 2", "starts_at": "2026-10-02T22:00:00Z",
                     "ends_at": "2026-10-03T00:00:00Z", "capacity": 2, "category": "technology"}],
         "signups": [{"reference_code": "EXT-000001", "event_id": 10, "name": "Sam Example",
-                     "email": "sam@example.org", "signup_time": "2026-09-20T10:00:00Z",
+                     "email": "sam@example.org", "signed_up_at": "2026-09-20T10:00:00Z",
                      "source": "CommunityHub App"}],
     }
 
@@ -56,7 +56,7 @@ def test_loading_twice_makes_no_duplicates(conn):
 
 
 @pytest.mark.parametrize("field,value", [
-    ("email", "not-an-email"), ("email", ""), ("signup_time", "yesterday"),
+    ("email", "not-an-email"), ("email", ""), ("signed_up_at", "yesterday"),
     ("reference_code", "EXT-12"), ("name", "  "), ("event_id", 999),
 ])
 def test_bad_signup_is_skipped_not_loaded(conn, field, value):

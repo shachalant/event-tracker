@@ -108,8 +108,10 @@ def load(conn, data):
             ).fetchone()[0]
             stats["events"] += 1
 
-        for s in data.get("signups", []):
+        for s in sorted(data.get("signups", []),
+                        key=lambda s: s.get("signed_up_at") or s.get("signup_time") or ""):
             code, email = s.get("reference_code"), clean_email(s.get("email"))
+            when = s.get("signed_up_at") or s.get("signup_time")
             problem = None
             if not isinstance(code, str) or not CODE_RE.match(code):
                 problem = "bad reference code"
@@ -119,7 +121,7 @@ def load(conn, data):
                 problem = "missing name"
             elif not email:
                 problem = "invalid email"
-            elif not parse_time(s.get("signup_time")):
+            elif not parse_time(when):
                 problem = "bad signup time"
             if problem:
                 stats["skipped"].append(f"signup {code}: {problem}")
@@ -132,7 +134,7 @@ def load(conn, data):
                        ON CONFLICT(reference_code) DO UPDATE SET
                          name = excluded.name, email = excluded.email,
                          signed_up_at = excluded.signed_up_at, source = excluded.source""",
-                    (event_ids[s["event_id"]], text(s["name"]), email, s["signup_time"],
+                    (event_ids[s["event_id"]], text(s["name"]), email, when,
                      code, text(s.get("source"))),
                 )
                 stats["signups"] += 1
